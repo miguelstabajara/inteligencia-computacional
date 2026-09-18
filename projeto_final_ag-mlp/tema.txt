@@ -1,0 +1,17 @@
+Miguel Soto Tabajara - 12221bcc002
+
+Tema: Abordagem hibrida AG-MLP para classificacao de genero musical
+
+Descricao: O trabalho aplica um Algoritmo Genetico para otimizar
+automaticamente a topologia e os hiperparametros de uma Rede Neural
+Artificial do tipo MLP (numero de camadas ocultas, quantidade de
+neuronios, funcao de ativacao e taxa de aprendizado), usada na
+classificacao de genero musical a partir de atributos de audio. Ao final,
+o desempenho da rede otimizada pelo AG e comparado ao de uma MLP
+configurada manualmente. O trabalho contempla Redes Neurais Artificiais
+e Computacao Evolutiva.
+
+Base de dados: Spotify Tracks Dataset (114.000 faixas, 125 generos,
+atributos de audio como danceability, energy, valence, acousticness,
+loudness e tempo)
+https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset
