@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classificação de Gênero Musical - IC</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,300..900;1,62..125,300..900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #14163a;
+      --cobalt: #2e3bcc;
+      --cobalt-deep: #232ea6;
+      --paper: #eef0f3;
+      --paper-2: #e2e5ec;
+      --signal: #ffc21a;
+      --muted: #5b6078;
+      --rule: rgba(20, 22, 58, 0.14);
+      --font: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #c9cdd8;
+      color: var(--ink);
+      font-family: var(--font);
+      font-stretch: 100%;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide {
+      width: 98vw;
+      max-width: 1600px;
+      height: 92vh;
+      max-height: 920px;
+      display: grid;
+      grid-template-columns: 34fr 30fr 36fr;
+      background: var(--paper);
+      box-shadow: 0 30px 60px -20px rgba(20, 22, 58, 0.45);
+      overflow: hidden;
+    }
+
+    /* ---------- Capa (sleeve) ---------- */
+    .sleeve {
+      position: relative;
+      background: var(--cobalt);
+      color: #fff;
+      padding: 44px 42px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      container-type: size;
+    }
+
+    .course {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.78);
+      max-width: 30ch;
+      line-height: 1.4;
+    }
+
+    .title {
+      margin-top: 36px;
+      font-size: min(4rem, 10.6cqi, 8.5cqh);
+      font-weight: 850;
+      font-stretch: 125%;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      position: relative;
+      z-index: 2;
+    }
+
+    .subtitle {
+      margin-top: 18px;
+      font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+      font-weight: 400;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.88);
+      max-width: 22ch;
+      position: relative;
+      z-index: 2;
+    }
+
+    .author {
+      margin-top: 10px;
+      position: relative;
+      z-index: 2;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    .author strong {
+      display: block;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    /* Disco saindo da capa */
+    .disc {
+      position: absolute;
+      width: min(74cqi, 46cqh, 430px);
+      aspect-ratio: 1;
+      right: -14cqi;
+      bottom: -8cqh;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 0 34%, rgba(255,255,255,0.05) 34.5% 35%, transparent 35.5%),
+        repeating-radial-gradient(circle at 50% 50%, #15161c 0 2px, #1d1f27 2px 3px);
+      box-shadow: -18px -10px 40px rgba(0, 0, 0, 0.35);
+      display: grid;
+      place-items: center;
+      animation: slideOut 1.1s cubic-bezier(.2,.7,.2,1) 0.2s both;
+      z-index: 1;
+    }
+    .disc::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 200deg, transparent 0 20%, rgba(255,255,255,0.09) 25%, transparent 32% 70%, rgba(255,255,255,0.06) 75%, transparent 82%);
+    }
+    .disc-label {
+      width: 34%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--signal);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .disc-label span {
+      font-weight: 800;
+      font-stretch: 115%;
+      font-size: clamp(0.7rem, 1vw, 0.95rem);
+      line-height: 1.1;
+    }
+    .disc-label::after {
+      content: "";
+      position: absolute;
+      width: 9%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--cobalt);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    @keyframes slideOut {
+      from { transform: translate(-30%, 12%) rotate(-40deg); }
+      to   { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    /* ---------- Lados A e B (encarte) ---------- */
+    .side {
+      container-type: inline-size;
+      padding: 44px 38px 36px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow-y: auto;
+    }
+    .side + .side { border-left: 1px solid var(--rule); }
+
+    .side-mark {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--cobalt);
+    }
+    .side h2 {
+      margin-top: 0;
+      font-size: clamp(1.5rem, 2vw, 2rem);
+      font-weight: 800;
+      font-stretch: 112%;
+      line-height: 1.05;
+      padding-bottom: 18px;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 20px;
+    }
+
+    .figures {
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: start;
+      column-gap: 36px;
+      margin-bottom: 18px;
+    }
+    .figure-num {
+      font-size: clamp(1.6rem, 8.5cqi, 2.6rem);
+      white-space: nowrap;
+      font-weight: 850;
+      font-stretch: 125%;
+      line-height: 1;
+      color: var(--cobalt);
+      font-variant-numeric: tabular-nums;
+    }
+    .figure-txt {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .lead {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: #2b2e52;
+      margin-bottom: 20px;
+      max-width: 60ch;
+    }
+
+    code {
+      font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: 0.86em;
+      background: var(--paper-2);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .group-label {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .features {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 20px;
+      margin-bottom: 20px;
+    }
+    .features li {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--rule);
+      font-size: 0.9rem;
+    }
+    .features li span:last-child {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 22px;
+    }
+    .genres span {
+      border: 1.5px solid var(--cobalt);
+      color: var(--cobalt);
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .btn {
+      margin-top: auto;
+      align-self: flex-start;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      font-family: var(--font);
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn:hover { background: var(--cobalt); }
+    .btn:focus-visible, .close-btn:focus-visible {
+      outline: 3px solid var(--signal);
+      outline-offset: 3px;
+    }
+
+    /* Tracklist do Lado B */
+    .tracks { list-style: none; counter-reset: t; }
+    .tracks li {
+      counter-increment: t;
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      padding: 14px 0 16px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .tracks li:first-child { padding-top: 0; }
+    .tracks li::before {
+      content: counter(t, decimal-leading-zero);
+      font-weight: 850;
+      font-stretch: 125%;
+      font-size: 1.15rem;
+      color: var(--cobalt);
+      line-height: 1.3;
+    }
+    .tracks h3 {
+      font-size: 1.08rem;
+      font-weight: 750;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .tracks p {
+      font-size: 0.95rem;
+      line-height: 1.58;
+      color: #2b2e52;
+      max-width: 62ch;
+    }
+
+    /* ---------- Modal ---------- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 22, 58, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal {
+      background: var(--paper);
+      width: 90vw;
+      max-width: 1100px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      border-top: 10px solid var(--cobalt);
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.45);
+    }
+    .modal-header {
+      padding: 20px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--ink);
+    }
+    .modal-header h3 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      font-stretch: 112%;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      line-height: 1;
+      color: var(--ink);
+      cursor: pointer;
+      padding: 0 6px;
+    }
+    .modal-body { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td {
+      text-align: left;
+      padding: 10px 28px 10px 0;
+      border-bottom: 1px solid var(--rule);
+      vertical-align: top;
+    }
+    th:first-child, td:first-child { padding-left: 28px; }
+    th {
+      position: sticky;
+      top: 0;
+      background: var(--paper-2);
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+    td:first-child { font-weight: 650; white-space: nowrap; }
+    td.range { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .use {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .use.in { background: var(--cobalt); color: #fff; }
+    .use.out { background: var(--paper-2); color: var(--muted); }
+    .use.label { background: var(--signal); color: var(--ink); }
+
+    /* ---------- Responsivo ---------- */
+    @media (max-height: 820px) and (min-width: 1001px) {
+      .slide { height: 94vh; }
+      .sleeve { padding: 32px 34px; }
+      .side { padding: 30px 30px 26px; }
+      .title { margin-top: 22px; }
+      .side h2 { font-size: 1.5rem; padding-bottom: 12px; margin-bottom: 14px; }
+      .figures { margin-bottom: 12px; }
+      .figure-num { font-size: clamp(1.5rem, 7.5cqi, 2rem); }
+      .figure-txt { font-size: 0.82rem; }
+      .lead { font-size: 0.86rem; line-height: 1.5; margin-bottom: 14px; }
+      .group-label { font-size: 0.85rem; margin-bottom: 4px; }
+      .features { margin-bottom: 14px; }
+      .features li { padding: 4px 0; font-size: 0.82rem; }
+      .genres { margin-bottom: 14px; gap: 6px; }
+      .genres span { font-size: 0.8rem; padding: 3px 9px; }
+      .btn { padding: 9px 16px; font-size: 0.9rem; }
+      .tracks li { padding: 9px 0 11px; grid-template-columns: 38px 1fr; }
+      .tracks h3 { font-size: 0.98rem; margin-bottom: 2px; }
+      .tracks p { font-size: 0.85rem; line-height: 1.48; }
+      .author { font-size: 0.85rem; }
+    }
+
+    @media (max-width: 1000px) {
+      body { height: auto; overflow: auto; display: block; }
+      .slide {
+        width: 100%;
+        height: auto;
+        max-height: none;
+        grid-template-columns: 1fr;
+      }
+      .sleeve { min-height: 460px; container-type: inline-size; }
+      .title { font-size: min(3.4rem, 10.6cqi); }
+      .disc { width: min(60cqi, 300px); right: -12cqi; bottom: -60px; }
+      .subtitle { margin-bottom: 160px; }
+      .side + .side { border-left: none; border-top: 1px solid var(--rule); }
+      .side { overflow: visible; }
+    }
+    @media (max-width: 520px) {
+      .features { grid-template-columns: 1fr; }
+      .sleeve, .side { padding: 32px 22px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .disc { animation: none; }
+      .modal-overlay { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="slide">
+
+    <!-- Capa -->
+    <section class="sleeve" aria-label="Tema">
+      <p class="course">GBC073 Inteligência Computacional, FACOM/UFU</p>
+      <p class="author">
+        <strong>Miguel Soto Tabajara</strong>
+        12221bcc002
+      </p>
+      <h1 class="title">Classificação de gênero musical</h1>
+      <p class="subtitle">Dataset e proposta de categorização a partir de atributos de áudio do Spotify</p>
+
+      <div class="disc" aria-hidden="true">
+        <div class="disc-label"><span>8<br>gêneros</span></div>
+      </div>
+    </section>
+
+    <!-- Lado A: dataset -->
+    <section class="side" aria-labelledby="ladoA">
+      <h2 id="ladoA">O dataset</h2>
+
+      <div class="figures">
+        <div>
+          <div class="figure-num">114 mil</div>
+          <div class="figure-txt">faixas no Spotify Tracks Dataset</div>
+        </div>
+        <div>
+          <div class="figure-num">10</div>
+          <div class="figure-txt">atributos de áudio usados como entrada</div>
+        </div>
+      </div>
+
+      <p class="lead">
+        Base pública em CSV, sem valores ausentes, com atributos calculados pelo Spotify para cada faixa e o gênero em <code>track_genre</code>. Não depende da API, cujos endpoints de áudio foram descontinuados em 2024.
+      </p>
+
+      <p class="group-label">Atributos de entrada</p>
+      <ul class="features">
+        <li><span>danceability</span><span>0–1</span></li>
+        <li><span>energy</span><span>0–1</span></li>
+        <li><span>valence</span><span>0–1</span></li>
+        <li><span>acousticness</span><span>0–1</span></li>
+        <li><span>instrumentalness</span><span>0–1</span></li>
+        <li><span>speechiness</span><span>0–1</span></li>
+        <li><span>liveness</span><span>0–1</span></li>
+        <li><span>loudness</span><span>dB</span></li>
+        <li><span>tempo</span><span>BPM</span></li>
+        <li><span>duration_ms</span><span>ms</span></li>
+      </ul>
+
+      <p class="group-label">Gêneros propostos</p>
+      <div class="genres">
+        <span>classical</span>
+        <span>death-metal</span>
+        <span>hip-hop</span>
+        <span>electronic</span>
+        <span>jazz</span>
+        <span>reggae</span>
+        <span>sertanejo</span>
+        <span>sleep</span>
+      </div>
+
+      <button class="btn" id="openModalBtn">Ver dicionário de atributos</button>
+    </section>
+
+    <!-- Lado B: proposta -->
+    <section class="side" aria-labelledby="ladoB">
+      <h2 id="ladoB">Proposta de categorização</h2>
+
+      <ol class="tracks">
+        <li>
+          <div>
+            <h3>Recorte de gêneros</h3>
+            <p>O dataset tem mais de uma centena de gêneros, muitos sobrepostos (<code>pop</code>, <code>power-pop</code>, <code>k-pop</code>). Selecionamos 8 musicalmente distintos, formando um problema de classificação multiclasse bem definido.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Tratamento de duplicatas</h3>
+            <p>A mesma faixa pode aparecer em mais de um gênero, ou em single e álbum. Duplicatas por <code>track_id</code> são removidas, eliminando faixas com rótulos conflitantes.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Seleção de atributos</h3>
+            <p>Mantemos apenas o que descreve o som. Saem textos e identificadores (<code>track_name</code>, <code>artists</code>, <code>album_name</code>), <code>popularity</code> e <code>explicit</code>, além de <code>key</code>, <code>mode</code> e <code>time_signature</code>, categóricas codificadas como número.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Normalização e divisão</h3>
+            <p>Atributos em escalas diferentes (<code>loudness</code> em dB, <code>tempo</code> em BPM, os demais entre 0 e 1) são padronizados. A base é dividida de forma estratificada em treino, validação e teste, preservando a proporção entre gêneros.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+  </main>
+
+  <!-- Modal: dicionário de atributos -->
+  <div class="modal-overlay" id="dictModal" role="dialog" aria-modal="true" aria-labelledby="dictTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="dictTitle">Dicionário de atributos</h3>
+        <button class="close-btn" id="closeModalBtn" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table>
+          <thead>
+            <tr><th>Atributo</th><th>Descrição</th><th>Faixa</th><th>Uso</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>danceability</td><td>Quão adequada a faixa é para dançar (ritmo, estabilidade da batida)</td><td class="range">0 – 1</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>energy</td><td>Intensidade e atividade percebidas</td><td class="range">0 – 1</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>valence</td><td>Positividade musical transmitida (alegre versus triste)</td><td class="range">0 – 1</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>acousticness</td><td>Confiança de que a faixa é acústica</td><td class="range">0 – 1</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>instrumentalness</td><td>Probabilidade de a faixa não ter vocais</td><td class="range">0 – 1</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>speechiness</td><td>Presença de palavra falada</td><td class="range">0 – 1</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>liveness</td><td>Probabilidade de gravação ao vivo</td><td class="range">0 – 1</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>loudness</td><td>Volume médio da faixa</td><td class="range">≈ −60 a 0 dB</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>tempo</td><td>Andamento estimado</td><td class="range">BPM</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>duration_ms</td><td>Duração da faixa</td><td class="range">milissegundos</td><td><span class="use in">Entrada</span></td></tr>
+            <tr><td>key</td><td>Tonalidade (Dó = 0, Dó# = 1, …)</td><td class="range">0 – 11</td><td><span class="use out">Removido</span></td></tr>
+            <tr><td>mode</td><td>Modo maior (1) ou menor (0)</td><td class="range">0 / 1</td><td><span class="use out">Removido</span></td></tr>
+            <tr><td>time_signature</td><td>Fórmula de compasso estimada</td><td class="range">3 – 7</td><td><span class="use out">Removido</span></td></tr>
+            <tr><td>popularity</td><td>Popularidade calculada pelo Spotify, baseada em reproduções recentes</td><td class="range">0 – 100</td><td><span class="use out">Removido</span></td></tr>
+            <tr><td>explicit</td><td>Indica conteúdo explícito na letra</td><td class="range">booleano</td><td><span class="use out">Removido</span></td></tr>
+            <tr><td>track_id, track_name, artists, album_name</td><td>Identificadores e textos livres</td><td class="range">texto</td><td><span class="use out">Removido</span></td></tr>
+            <tr><td>track_genre</td><td>Gênero musical da faixa</td><td class="range">categórico</td><td><span class="use label">Rótulo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('dictModal');
+    const openBtn = document.getElementById('openModalBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+
+    function openModal() { modal.classList.add('open'); closeBtn.focus(); }
+    function closeModal() { modal.classList.remove('open'); openBtn.focus(); }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+  </script>
+</body>
+</html>
